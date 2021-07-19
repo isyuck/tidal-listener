@@ -13,6 +13,7 @@ data GS = GS
   , sStream         :: T.Stream
   , sWS             :: Connection
   , sActivePatterns :: [TwitchPattern]
+  , sMaxPat         :: Integer
   }
 
 data TwitchPattern = TwitchPattern
