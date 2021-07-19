@@ -1,4 +1,4 @@
-import Sound.Tidal.Listener
+import qualified Sound.Tidal.Listener          as L
 
 main :: IO ()
-main = listen
+main = L.main

@@ -1,0 +1,27 @@
+extra-source-files:
+  - README.md
+
+dependencies:
+  - base >= 4.7 && < 5
+  - hosc
+  - network
+  - tidal >= 1.7.7
+  - hint
+  - mtl
+  - text
+  - websockets
+  - wuss
+
+library:
+  source-dirs: src
+
+executables:
+  tidal-listener-exe:
+    main: Main.hs
+    source-dirs: app
+    ghc-options:
+      - -threaded
+      - -rtsopts
+      - -with-rtsopts=-N
+    dependencies:
+      - tidal-listener
