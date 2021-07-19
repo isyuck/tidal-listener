@@ -1,4 +1,3 @@
-# tidal-listener
-Experimental tidal OSC listener
+# tidal-listener -> party
 
-See [wiki for api](https://github.com/tidalcycles/tidal-listener/wiki)
+fork of tidal-listener, using twitch messages instead of osc. see https://github.com/isyuck/tidal-party for more info.
