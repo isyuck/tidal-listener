@@ -94,6 +94,9 @@ act "!setcps" msg = do
 act "!now" _ = do
   cps <- getCps
   now <- O.time
-  chatM ("the current cycle is " ++ (show $ Tempo.timeToCycles cps now))
+  chatM
+    $  "the current cycle is "
+    ++ (show $ fromRational $ Tempo.timeToCycles cps now)
+
 
 act _ _ = return ()
