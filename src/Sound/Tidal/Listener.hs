@@ -5,7 +5,7 @@ module Sound.Tidal.Listener
 import           Control.Concurrent
 import           Control.Monad.State
 import           Network.WebSockets
-import           Sound.OSC.FD                  as O
+import           Sound.OSC.Time                as O
 import qualified Sound.Tidal.Context           as T
 import           Sound.Tidal.Hint
 import           Sound.Tidal.Stream             ( Target(..) )
@@ -56,6 +56,12 @@ run = do
 getCmd :: TwitchPattern -> String
 getCmd = takeWhile (/= ' ') . content
 
+chatM :: String -> GameState ()
+chatM s = gets sWS >>= liftIO . sendChatMessage s
+
+getCps :: GameState Tempo.Tempo
+getCps = gets sStream >>= liftIO . readMVar . T.sTempoMV
+
 -- act on a message from twitch
 act :: String -> TwitchPattern -> GameState ()
 -- send code to tidal
@@ -65,9 +71,9 @@ act "!t" msg = do
       user = username msg
 
   gets sIn >>= \i -> liftIO $ putMVar i (drop 4 code)
-  response <- gets sOut >>= liftIO . takeMVar
+  r <- gets sOut >>= liftIO . takeMVar
 
-  case response of
+  case r of
     -- silently send pattern to tidal
     (HintOK pat) -> gets sStream >>= \s -> liftIO $ T.streamReplace s user pat
     -- complain to user about error in pattern
@@ -76,8 +82,18 @@ act "!t" msg = do
 
 -- query the cps
 act "!cps" _ = do
-  cps <- gets sStream >>= liftIO . readMVar . T.sTempoMV
-  let msg = "the cps is " ++ (show $ Tempo.cps cps)
-  gets sWS >>= liftIO . sendChatMessage msg
+  getCps >>= \cps -> chatM ("the cps is " ++ (show $ Tempo.cps cps))
+
+-- set cps (right now this parses the result as a pattern, so stuff like
+-- setcps(160/60/4) isn't possible, only setcps 0.5 etc)
+act "!setcps" msg = do
+  gets sStream >>= \s ->
+    liftIO $ T.streamOnce s $ T.cps $ T.parseBP_E $ (drop 8 $ content msg)
+
+-- get the current cycle
+act "!now" _ = do
+  cps <- getCps
+  now <- O.time
+  chatM ("the current cycle is " ++ (show $ Tempo.timeToCycles cps now))
 
 act _ _ = return ()
